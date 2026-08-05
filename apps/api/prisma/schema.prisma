@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  phone             String?  @unique
+  passwordHash      String
+  country           String?
+  dateOfBirth       DateTime?
+  username          String   @unique
+  displayName       String
+  genderIdentity    String?
+  interestedIn      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  isActive          Boolean  @default(false)
+  isVerified        Boolean  @default(false)
+  profile           Profile?
+  consents          ConsentRecord[]
+  reports           Report[]
+  verification      VerificationRecord?
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  bio          String?
+  interests    String[]
+  languages    String[]
+  heightCm     Int?
+  occupation   String?
+  education    String?
+  relationshipGoals String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ConsentRecord {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  termsAccepted    Boolean
+  privacyAccepted  Boolean
+  guidelinesAccepted Boolean
+  safetyAccepted   Boolean
+  acceptedAt       DateTime @default(now())
+  withdrawnAt      DateTime?
+}
+
+model VerificationRecord {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  emailVerified      Boolean  @default(false)
+  phoneVerified      Boolean  @default(false)
+  ageVerified        Boolean  @default(false)
+  idVerified         Boolean  @default(false)
+  selfieVerified     Boolean  @default(false)
+  status             String   @default("PENDING")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Report {
+  id            String   @id @default(cuid())
+  reporterId    String
+  reporter      User     @relation(fields: [reporterId], references: [id])
+  reportedUserId String
+  reason        String
+  description   String?
+  evidenceUrl   String?
+  createdAt     DateTime @default(now())
+}
